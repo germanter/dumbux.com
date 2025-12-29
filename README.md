@@ -1,5 +1,7 @@
 # Dumbux - Messy SandBox
 
+dumbux.com
+
 Dumbux is a collection of chaotic, physics-based sandbox experiments and games that run directly in your browser. Embracing the "messy" side of creativity, it features raw, real-time interactions with custom physics engines, AI, and high-performance rendering.
 
 The entire site is fully client-side:
