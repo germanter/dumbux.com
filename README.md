@@ -1,12 +1,5 @@
 # Dumbux - Messy SandBox
 
-[dumbux.com](https://dumbux.com)
-
-[Figma1](https://www.figma.com/design/xVkJpXXT6By6TkmY2BYLuw/Cosmix-AI?node-id=71-3171&p=f&t=1vXxam2zVGn7siMg-0).
-[Figma2](https://www.figma.com/design/9FrSyO3ajfNzRcva1ywJ2K/Untitled?node-id=73-22&t=ER4HyLdM0ikQEQ8u-1).
-[APP](https://cosmix.vercel.app/).
-
-
 Dumbux is a collection of chaotic, physics-based sandbox experiments and games that run directly in your browser. Embracing the "messy" side of creativity, it features raw, real-time interactions with custom physics engines, AI, and high-performance rendering.
 
 The entire site is fully client-side:
