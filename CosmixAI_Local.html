@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CosmixAI ✨ — Local</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #212121;
+            --msg-user: #303030;
+            --input-bg: #303030;
+            --btn-color: #C1C1C1;
+            --text-main: #ffffff;
+            --text-muted: #9e9e9e;
+            --scrollbar-thumb: #444;
+            --accent: #7c6fff;
+        }
+
+        html { overflow-y: scroll; }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); }
+        ::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 5px;
+            border: 2px solid var(--bg-color);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Roboto', sans-serif;
+            display: flex; flex-direction: column; min-height: 100vh;
+        }
+
+        .chat-wrapper {
+            display: flex; flex-direction: column; flex: 1;
+            width: 100%; max-width: 900px; margin: 0 auto;
+        }
+
+        header {
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 900;
+            font-size: 1.15rem;
+            letter-spacing: -0.5px;
+            border-bottom: 1px solid #2e2e2e;
+            position: sticky; top: 0;
+            background: var(--bg-color);
+            z-index: 10;
+        }
+
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #555;
+            transition: background 0.4s ease;
+            flex-shrink: 0;
+        }
+        .status-dot.online { background: #4caf50; box-shadow: 0 0 6px #4caf5088; }
+        .status-dot.error  { background: #f44336; box-shadow: 0 0 6px #f4433688; }
+
+        .model-badge {
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 20px;
+            padding: 2px 10px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        #chatContainer { flex: 1; padding: 20px; padding-bottom: 0; }
+
+        .message-row {
+            display: flex; flex-direction: column;
+            margin-bottom: 22px;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .message-row.user { align-items: flex-end; }
+        .user .bubble {
+            background-color: var(--msg-user);
+            padding: 12px 16px;
+            border-radius: 18px 18px 4px 18px;
+            max-width: 80%;
+            line-height: 1.55;
+        }
+
+        .message-row.bot { align-items: flex-start; }
+        .bot-content { display: flex; gap: 12px; max-width: 88%; }
+
+        .avatar {
+            width: 32px; height: 32px; background: #2d2d2d;
+            border: 1px solid #3a3a3a;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 16px;
+        }
+
+        .bubble {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+        }
+
+        .bot .bubble {
+            padding: 12px 16px;
+            background: #272727;
+            border-radius: 4px 18px 18px 18px;
+            border: 1px solid #2e2e2e;
+        }
+
+        .action-bar {
+            display: flex; gap: 8px;
+            margin-top: 6px; margin-left: 44px;
+        }
+        .action-btn {
+            background: transparent; border: none; cursor: pointer;
+            padding: 4px 6px; border-radius: 6px;
+            display: flex; align-items: center; gap: 4px;
+            color: var(--text-muted); font-size: 11px;
+            transition: background 0.15s;
+        }
+        .action-btn svg { width: 13px; height: 13px; fill: var(--text-muted); flex-shrink: 0; }
+        .action-btn:hover { background: #2e2e2e; color: #fff; }
+        .action-btn:hover svg { fill: #fff; }
+
+        .input-area {
+            position: sticky; bottom: 0;
+            padding: 16px 20px 20px;
+            background: linear-gradient(to top, var(--bg-color) 80%, transparent);
+        }
+        .input-container {
+            background: var(--input-bg);
+            border: 1px solid #383838;
+            border-radius: 14px;
+            padding: 6px 8px 6px 16px;
+            display: flex; align-items: center; gap: 8px;
+            transition: border-color 0.2s;
+        }
+        .input-container:focus-within { border-color: #555; }
+
+        input {
+            flex: 1; background: transparent; border: none;
+            color: white; padding: 10px 0;
+            font-size: 15px; outline: none;
+            font-family: 'Roboto', sans-serif;
+        }
+        input::placeholder { color: var(--text-muted); }
+
+        #sendBtn {
+            background: var(--btn-color); border: none; border-radius: 9px;
+            color: #111; font-weight: 700; padding: 10px 18px;
+            cursor: pointer; transition: all 0.2s ease;
+            font-size: 14px; white-space: nowrap;
+            font-family: 'Roboto', sans-serif;
+        }
+        #sendBtn:hover:not(:disabled) { background: #fff; }
+        #sendBtn:disabled { background: #383838; color: #555; cursor: not-allowed; }
+
+        /* Loader dots */
+        .loader-wrap {
+            display: flex; align-items: center; gap: 10px;
+            margin-left: 44px; margin-top: 4px;
+            color: var(--text-muted); font-size: 13px;
+        }
+        .dots { display: flex; gap: 4px; }
+        .dot {
+            width: 5px; height: 5px;
+            background: var(--text-muted); border-radius: 50%;
+            animation: blink 1.3s infinite both;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink { 0%,100%{opacity:0.15} 50%{opacity:1} }
+
+        /* Error / info banner */
+        .banner {
+            margin: 0 20px 16px;
+            background: #2c1f1f;
+            border: 1px solid #5a2a2a;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #ff8a80;
+            display: none;
+        }
+        .banner.show { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="chat-wrapper">
+    <header>
+        <span class="status-dot" id="statusDot"></span>
+        CosmixAI ✨
+        <span class="model-badge" id="modelBadge">connecting…</span>
+    </header>
+
+    <div id="chatContainer">
+        <div class="message-row bot">
+            <div class="bot-content">
+                <div class="avatar">✨</div>
+                <div class="bubble">Hello! I am CosmixAI running locally on your machine. How can I assist you?</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="errorBanner" class="banner">
+        ⚠️ Cannot reach Ollama. Make sure it is running: <strong>ollama serve</strong> — then refresh.
+    </div>
+
+    <div class="input-area">
+        <div class="input-container">
+            <input type="text" id="userInput" placeholder="Ask me anything..." autocomplete="off">
+            <button id="sendBtn" disabled>Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ─── CONFIG ───────────────────────────────────────────────
+    const OLLAMA_URL = "http://localhost:11434";
+    const MODEL      = "dolphin-mistral";
+    // ──────────────────────────────────────────────────────────
+
+    const chatContainer = document.getElementById('chatContainer');
+    const userInput     = document.getElementById('userInput');
+    const sendBtn       = document.getElementById('sendBtn');
+    const statusDot     = document.getElementById('statusDot');
+    const modelBadge    = document.getElementById('modelBadge');
+    const errorBanner   = document.getElementById('errorBanner');
+
+    // Conversation history (no system prompt)
+    let messages = [];
+    let isStreaming = false;
+
+    // ── Check Ollama is reachable on load ──────────────────────
+    async function checkOllama() {
+        try {
+            const r = await fetch(`${OLLAMA_URL}/api/tags`, { signal: AbortSignal.timeout(3000) });
+            if (r.ok) {
+                statusDot.className = 'status-dot online';
+                modelBadge.textContent = MODEL;
+                sendBtn.disabled = userInput.value.trim().length === 0;
+                errorBanner.classList.remove('show');
+            } else throw new Error();
+        } catch {
+            statusDot.className = 'status-dot error';
+            modelBadge.textContent = 'offline';
+            errorBanner.classList.add('show');
+        }
+    }
+    checkOllama();
+
+    // ── Input state ────────────────────────────────────────────
+    function syncButton() {
+        sendBtn.disabled = isStreaming || userInput.value.trim().length === 0;
+    }
+    userInput.addEventListener('input', syncButton);
+    userInput.addEventListener('keypress', e => {
+        if (e.key === 'Enter' && !sendBtn.disabled) sendMessage();
+    });
+    sendBtn.addEventListener('click', sendMessage);
+
+    // ── Send ───────────────────────────────────────────────────
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text || isStreaming) return;
+
+        isStreaming = true;
+        userInput.value = '';
+        syncButton();
+
+        appendUserMessage(text);
+        messages.push({ role: "user", content: text });
+
+        const loader = showLoader();
+
+        try {
+            const response = await fetch(`${OLLAMA_URL}/api/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    model: MODEL,
+                    messages: messages,
+                    stream: true          // stream for faster first token
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            loader.remove();
+
+            // Create bot bubble for streaming
+            const { row, bubbleEl } = appendBotMessage('');
+            let fullReply = '';
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n').filter(l => l.trim());
+
+                for (const line of lines) {
+                    try {
+                        const json = JSON.parse(line);
+                        const token = json?.message?.content || '';
+                        fullReply += token;
+                        bubbleEl.textContent = fullReply;
+                        scrollBottom();
+                    } catch { /* incomplete JSON chunk, skip */ }
+                }
+            }
+
+            messages.push({ role: "assistant", content: fullReply });
+            addCopyButton(row, fullReply);
+
+        } catch (err) {
+            console.error(err);
+            loader.remove();
+            appendBotMessage("⚠️ Could not reach Ollama. Is it running? Try: ollama serve");
+            statusDot.className = 'status-dot error';
+            modelBadge.textContent = 'offline';
+            errorBanner.classList.add('show');
+        }
+
+        isStreaming = false;
+        syncButton();
+        scrollBottom();
+        userInput.focus();
+    }
+
+    // ── UI helpers ─────────────────────────────────────────────
+    function appendUserMessage(text) {
+        const row = document.createElement('div');
+        row.className = 'message-row user';
+        row.innerHTML = `<div class="bubble">${escapeHTML(text)}</div>`;
+        chatContainer.appendChild(row);
+        scrollBottom();
+    }
+
+    function appendBotMessage(text) {
+        const row = document.createElement('div');
+        row.className = 'message-row bot';
+
+        const content = document.createElement('div');
+        content.className = 'bot-content';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.textContent = '✨';
+
+        const bubbleEl = document.createElement('div');
+        bubbleEl.className = 'bubble';
+        bubbleEl.textContent = text;
+
+        content.appendChild(avatar);
+        content.appendChild(bubbleEl);
+        row.appendChild(content);
+        chatContainer.appendChild(row);
+        scrollBottom();
+        return { row, bubbleEl };
+    }
+
+    function addCopyButton(row, text) {
+        const bar = document.createElement('div');
+        bar.className = 'action-bar';
+
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.innerHTML = `
+            <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            Copy
+        `;
+        btn.onclick = () => {
+            navigator.clipboard.writeText(text).then(() => {
+                btn.innerHTML = '✓ Copied';
+                setTimeout(() => {
+                    btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg> Copy`;
+                }, 1500);
+            });
+        };
+
+        bar.appendChild(btn);
+        row.appendChild(bar);
+    }
+
+    function showLoader() {
+        const el = document.createElement('div');
+        el.className = 'message-row bot';
+        el.innerHTML = `
+            <div class="loader-wrap">
+                <div class="dots">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+                <span>Thinking locally…</span>
+            </div>`;
+        chatContainer.appendChild(el);
+        scrollBottom();
+        return el;
+    }
+
+    function scrollBottom() {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    function escapeHTML(str) {
+        return str.replace(/[&<>"']/g, m => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        })[m]);
+    }
+</script>
+
+</body>
+</html>
